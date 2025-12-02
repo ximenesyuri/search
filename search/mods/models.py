@@ -1,4 +1,4 @@
-from typed import model, MODEL, Str
+from typed import model, MODEL, _MODEL_, Str
 
 @model(ordered=True)
 class Indexes(MODEL): pass
@@ -7,7 +7,7 @@ class Indexes(MODEL): pass
 class Fields(MODEL): pass
 
 @model
-class Filters(Indexes, Fields): pass
+class Filters(Indexes, Fields, _MODEL_): pass
 
 @model
 class Schema(MODEL):
