@@ -1,7 +1,8 @@
-from typed import Dict, List, Str, Any
+from typed import Dict, List, Str, Any, Nat, Maybe
 from search.mods.models import Schema, Filters
 from search.mods.fields import _field_specs
 from search.mods.indexes import _index_filters, _index_specs
+
 
 def _get_in(entity: Dict, path: List(Str), default: Any):
     cur = entity
@@ -15,14 +16,15 @@ def _get_in(entity: Dict, path: List(Str), default: Any):
             return default
     return cur
 
+
 def _iter(root: Dict, index_specs: List(Dict), index_filters: Dict):
     """
     Traverse a tree shaped as:
 
         idx1 -> idx2 -> ... -> idxN -> entity
 
-    `index_specs` is an ordered list [{'name': 'site', ...}, ...].
-    `index_filters` is a dict { 'site': value, 'kind': value, ... }.
+    `index_specs` is an ordered list [{'name': 'id', ...}, ...].
+    `index_filters` is a dict { 'id': value, ... }.
     """
     if not index_specs:
         yield {}, root
@@ -50,9 +52,12 @@ def _iter(root: Dict, index_specs: List(Dict), index_filters: Dict):
 
     yield from _recurse(root, 0, {})
 
-def _all_entries(schema: Schema, json_data: Dict, filters: Filters) -> List(Dict):
+
+def _all_entries(schema: Schema, json_data: Dict, filters: Maybe(Filters)) -> List(Dict):
     """
     Flatten `json_data` according to `schema`, applying only *index* filters.
+
+    It traverses json_data[schema.root] following the index models.
 
     Returns a list of records like:
 
@@ -68,11 +73,19 @@ def _all_entries(schema: Schema, json_data: Dict, filters: Filters) -> List(Dict
     """
     index_specs = _index_specs(schema)
     index_filters = _index_filters(schema, filters)
-    field_specs = _field_specs(schema.fields.__class__)
+
+    root_key = schema.root
+    root_data = json_data.get(root_key, {})
+
+    fields_model_cls = schema.fields
+    if not isinstance(fields_model_cls, type) and hasattr(fields_model_cls, '__class__'):
+        fields_model_cls = fields_model_cls.__class__
+
+    field_specs = _field_specs(fields_model_cls)
 
     results = []
 
-    for index_values, entity in _iter(json_data, index_specs, index_filters):
+    for index_values, entity in _iter(root_data, index_specs, index_filters):
         if not isinstance(entity, dict):
             continue
 
@@ -82,19 +95,22 @@ def _all_entries(schema: Schema, json_data: Dict, filters: Filters) -> List(Dict
             value = _get_in(entity, spec["path"], spec["default"])
             record[fname] = value
 
-        record["entity"] = entity
         results.append(record)
 
     return results
 
-def _apply_filters(entries: List(Dict), schema: Schema, filters: Filters) -> List(Dict):
+
+def _apply_filters(entries: List(Dict), schema: Schema, filters: Maybe(Filters)) -> List(Dict):
     if filters is None:
         return entries
 
     filter_cls = filters.__class__
     filter_attrs = filter_cls.attrs
-    index_cls = schema.indexes.__class__
-    index_names = set(index_cls.keys())
+
+    idx_cls = schema.indexes
+    if not (isinstance(idx_cls, type) and hasattr(idx_cls, 'keys')):
+        idx_cls = idx_cls.__class__
+    index_names = set(idx_cls.keys())
 
     def _norm(x):
         if x is None:
@@ -103,7 +119,8 @@ def _apply_filters(entries: List(Dict), schema: Schema, filters: Filters) -> Lis
 
     for name, meta in filter_attrs.items():
         if name in index_names:
-            continue  # those are index filters, already applied in _all_entries
+            continue
+
         fval = getattr(filters, name, None)
         if fval is None:
             continue
@@ -113,11 +130,7 @@ def _apply_filters(entries: List(Dict), schema: Schema, filters: Filters) -> Lis
 
     return entries
 
-def _filtered_entries(schema: Schema, json_data: Dict, filters: Filters) -> List(Dict):
-    """
-    1. Flatten json_data according to schema (applying index filters).
-    2. Apply non-index filters from `filters`.
-    """
+def _filtered_entries(schema: Schema, json_data: Dict, filters: Maybe(Filters)) -> List(Dict):
     entries = _all_entries(schema=schema, json_data=json_data, filters=filters)
     entries = _apply_filters(entries, schema, filters)
     return entries

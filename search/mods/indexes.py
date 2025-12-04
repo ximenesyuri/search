@@ -1,14 +1,18 @@
-from typed import List, Dict, Any, Str, Nat
+from typed import List, Dict, Maybe
 from search.mods.models import Schema, Filters
 
+
+def _get_indexes_model(schema: Schema):
+    idx = schema.indexes
+    if isinstance(idx, type) and hasattr(idx, 'attrs'):
+        return idx
+    return idx.__class__
+
+
 def _index_specs(schema: Schema) -> List(Dict):
-    """
-    Ordered list of index specs from schema.indexes.attrs.
-    """
-    idx_model = schema.indexes
-    idx_cls = idx_model.__class__
-    names = list(idx_cls.keys())   # ordered keys
-    attrs = idx_cls.attrs          # name -> {'type', 'optional', 'default'}
+    idx_cls = _get_indexes_model(schema)
+    names = list(idx_cls.keys())
+    attrs = idx_cls.attrs
 
     specs = []
     for name in names:
@@ -21,24 +25,22 @@ def _index_specs(schema: Schema) -> List(Dict):
         })
     return specs
 
-def _index_filters(schema: Schema, filters: Filters) -> Dict:
-    """
-    Use the schema's index definitions and a Filters instance to build
-    {index_name: value} for non-None index filters.
-    """
-    idx_model = schema.indexes
-    idx_cls = idx_model.__class__
-    names = list(idx_cls.keys())  # index names
 
-    # start from defaults from schema.indexes
-    base = {}
+def _index_filters(schema: Schema, filters: Maybe(Filters)) -> Dict:
+    if filters is None:
+        return {}
+
+    idx_cls = _get_indexes_model(schema)
+    names = list(idx_cls.keys())
+
+    result: Dict = {}
     for name in names:
-        base[name] = getattr(idx_model, name)
+        if not hasattr(filters, name):
+            continue
+        val = getattr(filters, name)
+        if val is None:
+            continue
+        result[name] = val
 
-    # override from Filters instance (which extends Indexes) if provided
-    if filters is not None:
-        for name in names:
-            if hasattr(filters, name):
-                base[name] = getattr(filters, name)
+    return result
 
-    return {name: val for name, val in base.items() if val is not None}
