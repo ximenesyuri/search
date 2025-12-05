@@ -10,7 +10,6 @@ class Fields: pass
 @model
 class Filters: pass
 
-
 class _INDEXES_(MODEL_META):
     def __instancecheck__(cls, instance):
         if not instance in MODEL:

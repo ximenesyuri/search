@@ -18,14 +18,6 @@ def _get_in(entity: Dict, path: List(Str), default: Any):
 
 
 def _iter(root: Dict, index_specs: List(Dict), index_filters: Dict):
-    """
-    Traverse a tree shaped as:
-
-        idx1 -> idx2 -> ... -> idxN -> entity
-
-    `index_specs` is an ordered list [{'name': 'id', ...}, ...].
-    `index_filters` is a dict { 'id': value, ... }.
-    """
     if not index_specs:
         yield {}, root
         return
@@ -54,23 +46,6 @@ def _iter(root: Dict, index_specs: List(Dict), index_filters: Dict):
 
 
 def _all_entries(schema: Schema, json_data: Dict, filters: Maybe(Filters)) -> List(Dict):
-    """
-    Flatten `json_data` according to `schema`, applying only *index* filters.
-
-    It traverses json_data[schema.root] following the index models.
-
-    Returns a list of records like:
-
-      {
-        <index1>: value,
-        <index2>: value,
-        ...,
-        <field1>: value1,
-        <field2>: value2,
-        ...,
-        "entity": full_original_entity_dict,
-      }
-    """
     index_specs = _index_specs(schema)
     index_filters = _index_filters(schema, filters)
 

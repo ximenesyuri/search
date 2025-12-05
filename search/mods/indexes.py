@@ -1,13 +1,11 @@
 from typed import List, Dict, Maybe
 from search.mods.models import Schema, Filters
 
-
 def _get_indexes_model(schema: Schema):
     idx = schema.indexes
     if isinstance(idx, type) and hasattr(idx, 'attrs'):
         return idx
     return idx.__class__
-
 
 def _index_specs(schema: Schema) -> List(Dict):
     idx_cls = _get_indexes_model(schema)

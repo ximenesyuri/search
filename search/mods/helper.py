@@ -8,10 +8,6 @@ def _normalize_queries(query: Union(Str, List(Str))) -> List(Str):
     return []
 
 def _ensure_no_defaults(cls, kind: str):
-    """
-    Forbid class-level defaults for annotated attributes.
-    Used for Indexes and Fields models.
-    """
     ann = getattr(cls, '__annotations__', {})
     for name in ann:
         if name in cls.__dict__:
@@ -22,9 +18,6 @@ def _ensure_no_defaults(cls, kind: str):
 
 
 def _ensure_extends(cls, base, kind: str):
-    """
-    Ensure `cls` extends the given base model type (directly or via subclass).
-    """
     bases = getattr(cls, '__bases__', ())
     if not any(isinstance(b, type) and issubclass(b, base) for b in bases):
         raise TypeError(

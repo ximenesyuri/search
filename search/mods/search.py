@@ -1,10 +1,9 @@
+import re
+import difflib
 from typed import typed, List, Dict, Str, Bool, Maybe, Nat, Union, Regex, Range, Float
 from search.mods.models import Filters, Schema
 from search.mods.entries import _filtered_entries
 from search.mods.indexes import _index_specs
-
-import re
-import difflib
 
 QUERY_PATTERN = r'^(?:\s*(?:\(|\)|AND|OR|NOT|[^()\s]+)\s*)+$'
 Query = Regex(QUERY_PATTERN)
