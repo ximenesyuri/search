@@ -1,6 +1,8 @@
 from search.mods.search import search
 from search.mods.models import Schema, Fields, Filters, Indexes
 from search.mods.decorators import fields, filters, indexes
+from search.mods.sql import register_schema, sql
+from search.mods.unflat import unflat
 
 json_data = {
     "books": {
@@ -43,7 +45,7 @@ json_data = {
     },
     "movies": {
         "movie_201": {
-            "title": "The Matrix",
+            "title": "aaaa",
             "director": "The Wachowskis",
             "genre": "Science Fiction",
             "tags": ["cyberpunk", "philosophy", "action"],
@@ -109,6 +111,34 @@ book_schema = Schema(
     fields=BookFields,     # model class
 )
 
+register_schema(book_schema)
+
+@indexes
+class MoviesIndexes(Indexes):
+    id: Str
+
+@fields
+class MoviesStudio(Fields):
+    name: Str
+    city: Str
+
+@fields
+class MoviesFields(Fields):
+    title: Str
+    author: Str
+    genre: Str
+    tags: List(Str)
+    publication_year: Nat
+    available: Bool
+    studio: MoviesStudio
+
+movies_schema = Schema(
+    root="movies",
+    indexes=MoviesIndexes,   # model class
+    fields=MoviesFields,     # model class
+)
+
+register_schema(movies_schema)
 
 @filters(schema=book_schema)
 class BookFilter1(Filters):
@@ -153,4 +183,11 @@ def search_by_title(
     return results
 
 from utils import json
-print(json.print(search_by_title(json_data=json_data, fuzzy=True, query="a NOT b", temp=100, max_results=5, available=False)))
+#print(json.print(unflat(search_by_title(json_data=json_data, fuzzy=True, query="a NOT b", temp=100, max_results=5, available=False))))
+
+sql_query = """
+SELECT title
+FROM books
+"""
+
+json.print(unflat(sql(json_data=json_data, query=sql_query)))

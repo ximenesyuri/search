@@ -177,6 +177,7 @@ def _reshape_entry(entry: Dict, schema: Schema) -> Dict:
 
     into:
       {
+        "root": "<root>",
         "indexes": { "id": ... },
         "fields":  { "title": ..., "publisher.name": ... }
       }
@@ -189,7 +190,12 @@ def _reshape_entry(entry: Dict, schema: Schema) -> Dict:
             indexes[k] = v
         else:
             fields[k] = v
-    return {"indexes": indexes, "fields": fields}
+
+    return {
+        "root": str(schema.root),
+        "indexes": indexes,
+        "fields": fields,
+    }
 
 def _get_targets_auto(e, field):
     val = e.get(field, None)
