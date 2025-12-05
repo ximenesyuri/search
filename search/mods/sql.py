@@ -4,7 +4,7 @@ from search.mods.entries import _all_entries
 from search.mods.indexes import _index_specs
 from search.mods.fields import _field_specs
 from search.mods.models import Schema
-from search.mods.search import _reshape_entry
+from search.mods.search_ import _reshape_entry
 
 SCHEMA_REGISTRY = {}
 
