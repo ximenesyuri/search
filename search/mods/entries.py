@@ -87,6 +87,8 @@ def _apply_filters(entries: List(Dict), schema: Schema, filters: Maybe(Filters))
         idx_cls = idx_cls.__class__
     index_names = set(idx_cls.keys())
 
+    field_name_map = getattr(filter_cls, '_field_name_map', {})
+
     def _norm(x):
         if x is None:
             return None
@@ -101,7 +103,9 @@ def _apply_filters(entries: List(Dict), schema: Schema, filters: Maybe(Filters))
             continue
 
         target = _norm(fval)
-        entries = [e for e in entries if _norm(e.get(name)) == target]
+        field_key = field_name_map.get(name, name)
+
+        entries = [e for e in entries if _norm(e.get(field_key)) == target]
 
     return entries
 
