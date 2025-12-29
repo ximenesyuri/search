@@ -1,4 +1,5 @@
-from typed import model, Entry, MODEL
+from typed import model, MODEL
+from utils.types import Entry
 from typed.mods.meta.models import MODEL_META
 
 @model

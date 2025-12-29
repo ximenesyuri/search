@@ -1,5 +1,3 @@
-# search/mods/unflat.py
-
 from typing import Any, Dict, List, Union
 
 from search.mods.indexes import _index_specs
