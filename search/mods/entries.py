@@ -1,4 +1,5 @@
-from typed import Dict, List, Str, Any, Nat, Maybe
+from typed import Dict, List, Str, Any, Maybe
+from utils.types import Nat
 from search.mods.models import Schema, Filters
 from search.mods.fields import _field_specs
 from search.mods.indexes import _index_filters, _index_specs

@@ -1,6 +1,7 @@
 import re
 import difflib
-from typed import typed, List, Dict, Str, Bool, Maybe, Nat, Union, Regex, Range, Float
+from typed import typed, List, Dict, Str, Bool, Maybe, Union, Regex, Range, Float
+from utils.types import Nat
 from search.mods.models import Filters, Schema
 from search.mods.entries import _filtered_entries
 from search.mods.indexes import _index_specs
