@@ -1,6 +1,6 @@
 import re
 import difflib
-from typed import typed, List, Dict, Str, Bool, Maybe, Union, Regex, Range, Float
+from typed import typed, List, Dict, Str, Bool, Maybe, Union, Regex, Range
 from utils.types import Nat
 from search.mods.models import Filters, Schema
 from search.mods.entries import _filtered_entries
@@ -29,12 +29,12 @@ def _insert_implicit_and(tokens):
 
     return new_tokens
 
-def _similarity_threshold(temp: Nat) -> Float:
+def _similarity_threshold(temp):
     t = max(0, min(100, temp))
     return 0.9 - 0.8 * (t / 100.0)
 
 
-def _targets_match_term(targets, term: Str, fuzzy: Bool, exact: Bool, temp: Nat) -> Bool:
+def _targets_match_term(targets, term, fuzzy, exact, temp):
     term = str(term).strip().lower()
     if not term:
         return False
@@ -62,7 +62,7 @@ def _targets_match_term(targets, term: Str, fuzzy: Bool, exact: Bool, temp: Nat)
 
 
 class _QueryParser:
-    def __init__(self, tokens, fuzzy: Bool, exact: Bool, temp: Nat, get_targets):
+    def __init__(self, tokens, fuzzy, exact, temp, get_targets):
         self.tokens = tokens
         self.pos = 0
         self.fuzzy = fuzzy
@@ -155,7 +155,7 @@ class _QueryParser:
         return _pred
 
 
-def _build_query_predicate(query: Str, fuzzy: Bool, exact: Bool, temp: Nat, get_targets):
+def _build_query_predicate(query, fuzzy, exact, temp, get_targets):
     q = str(query or "").strip()
     if not q:
         return lambda entry: False
@@ -170,7 +170,7 @@ def _build_query_predicate(query: Str, fuzzy: Bool, exact: Bool, temp: Nat, get_
     parser = _QueryParser(tokens, fuzzy=fuzzy, exact=exact, temp=temp, get_targets=get_targets)
     return parser.parse()
 
-def _reshape_entry(entry: Dict, schema: Schema) -> Dict:
+def _reshape_entry(entry, schema):
     """
     Convert a flat entry:
       { "id": ..., "title": ..., "publisher.name": ... }

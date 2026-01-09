@@ -1,7 +1,6 @@
-from typed import Tuple, Maybe, Dict
 from search.mods.models import Fields
 
-def _field_specs(fields_model_cls: type, prefix: Tuple=(), result: Maybe(Dict)=None) -> Dict:
+def _field_specs(fields_model_cls, prefix=(), result=None):
     if result is None:
         result = {}
 

@@ -1,5 +1,5 @@
 import re
-from typed import Any, Str, Dict, List, Bool, Tuple, Function, Nill
+from typed import typed, Any, Str, Dict, List
 from search.mods.entries import _all_entries
 from search.mods.indexes import _index_specs
 from search.mods.fields import _field_specs
@@ -8,7 +8,7 @@ from search.mods.search_ import _reshape_entry
 
 SCHEMA_REGISTRY = {}
 
-def register_schema(schema: Schema) -> Nill:
+def register_schema(schema):
     root = schema.root
     if not isinstance(root, str):
         root = str(root)
@@ -18,7 +18,7 @@ def register_schema(schema: Schema) -> Nill:
 _LIT_INT_RE = re.compile(r"^-?\d+$")
 _LIT_FLOAT_RE = re.compile(r"^-?\d+\.\d*$")
 
-def _parse_literal(s: Str) -> Any:
+def _parse_literal(s):
     s = s.strip()
     if not s:
         return s
@@ -62,7 +62,7 @@ _WHERE_TOKEN_RE = re.compile(
     re.IGNORECASE | re.VERBOSE,
 )
 
-def _tokenize_where(where: Str) -> List(Str):
+def _tokenize_where(where):
     where = where.strip()
     if not where:
         return []
@@ -195,7 +195,7 @@ def _build_where_predicate(where, primary_schema: Schema, primary_root):
 
 _JOIN_COND_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_.]*)\s*=\s*([A-Za-z_][A-Za-z0-9_.]*)\s*$")
 
-def _parse_from_root_spec(spec: Str) -> Tuple(Str, Schema, List(Str)):
+def _parse_from_root_spec(spec):
     parts = spec.split(".")
     root = parts[0]
 
@@ -219,7 +219,7 @@ def _parse_from_root_spec(spec: Str) -> Tuple(Str, Schema, List(Str)):
     return root, schema, index_names
 
 
-def _parse_qualified_ident(ident: Str, left_root: Str, right_root: Str, left_schema: Schema, right_schema: Schema) -> Dict:
+def _parse_qualified_ident(ident, left_root, right_root, left_schema, right_schema):
     parts = ident.split(".")
     if len(parts) < 2:
         raise ValueError(
@@ -264,7 +264,7 @@ def _parse_qualified_ident(ident: Str, left_root: Str, right_root: Str, left_sch
     return {"root": root, "is_index": False, "name": name_rest}
 
 
-def _parse_join_on(on_clause: Str, left_root: Str, right_root: Str, left_schema: Schema, right_schema: Schema) -> List:
+def _parse_join_on(on_clause, left_root, right_root, left_schema, right_schema):
     if not on_clause:
         raise ValueError("JOIN ... ON clause is required")
 
@@ -295,7 +295,7 @@ def _parse_join_on(on_clause: Str, left_root: Str, right_root: Str, left_schema:
     return conditions
 
 
-def _build_join_predicate(conditions: List, left_root: Str, right_root: Str) -> Function:
+def _build_join_predicate(conditions, left_root, right_root):
     def value_for_side(side, left_entry, right_entry):
         root = side["root"]
         name = side["name"]
@@ -305,7 +305,7 @@ def _build_join_predicate(conditions: List, left_root: Str, right_root: Str) -> 
             src = right_entry
         return src.get(name)
 
-    def _pred(left_entry: Dict, right_entry: Dict) -> Bool:
+    def _pred(left_entry, right_entry):
         for s1, s2 in conditions:
             v1 = value_for_side(s1, left_entry, right_entry)
             v2 = value_for_side(s2, left_entry, right_entry)
@@ -316,7 +316,7 @@ def _build_join_predicate(conditions: List, left_root: Str, right_root: Str) -> 
     return _pred
 
 
-def _combine_join_entries(left_entry: Dict, right_entry: Dict, right_root: Str, right_schema: Schema) -> Dict:
+def _combine_join_entries(left_entry, right_entry, right_root, right_schema):
     combined = dict(left_entry)
 
     right_index_names = {spec["name"] for spec in _index_specs(right_schema)}
@@ -339,7 +339,7 @@ _SQL_RE = re.compile(
     re.IGNORECASE | re.DOTALL | re.VERBOSE,
 )
 
-
+@typed
 def sql(query: Str, json_data: Dict) -> List(Dict):
     import re
 

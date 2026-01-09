@@ -1,13 +1,10 @@
-from typed import List, Dict, Maybe
-from search.mods.models import Schema, Filters
-
-def _get_indexes_model(schema: Schema):
+def _get_indexes_model(schema):
     idx = schema.indexes
     if isinstance(idx, type) and hasattr(idx, 'attrs'):
         return idx
     return idx.__class__
 
-def _index_specs(schema: Schema) -> List(Dict):
+def _index_specs(schema):
     idx_cls = _get_indexes_model(schema)
     names = list(idx_cls.keys())
     attrs = idx_cls.attrs
@@ -24,14 +21,14 @@ def _index_specs(schema: Schema) -> List(Dict):
     return specs
 
 
-def _index_filters(schema: Schema, filters: Maybe(Filters)) -> Dict:
+def _index_filters(schema, filters):
     if filters is None:
         return {}
 
     idx_cls = _get_indexes_model(schema)
     names = list(idx_cls.keys())
 
-    result: Dict = {}
+    result = {}
     for name in names:
         if not hasattr(filters, name):
             continue
