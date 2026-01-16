@@ -11,7 +11,7 @@ __imports__ = {
     "filters":         "search.mods.decorators",
     "indexes":         "search.mods.decorators",
     "register_schema": "search.mods.sql",
-    "sq":              "search.mods.sql",
+    "sql":              "search.mods.sql",
     "unflat":          "search.mods.unflat"
 }
 
