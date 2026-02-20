@@ -12,7 +12,7 @@ class Fields: pass
 @model
 class Filters: pass
 
-class _INDEXES_(_MODEL_, _LAZY_MODEL_):
+class _INDEXES_(_LAZY_MODEL_, _MODEL_):
     def __instancecheck__(cls, instance):
         if not instance in MODEL and not instance in LAZY_MODEL:
             return False
@@ -22,7 +22,7 @@ class _INDEXES_(_MODEL_, _LAZY_MODEL_):
             return False
         return True
 
-class _FIELDS_(_MODEL_, _LAZY_MODEL_):
+class _FIELDS_(_LAZY_MODEL_, _MODEL_):
     def __instancecheck__(cls, instance):
         if not instance in MODEL and not instance in LAZY_MODEL:
             return False
